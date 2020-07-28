@@ -27,7 +27,7 @@ while True:
 
     # Now it will check if User give a digit or not, and if so - digit is saved to Variable.
     # Also, it was required to allow negative and decimal numbers.
-    elif '-' in arg1 or '.' in arg1 or arg1.isdigit() == True:
+    elif '-' in arg1 or '.' in arg1 or arg1.isdigit():
         arg1 = float(arg1)
 
     else:
@@ -78,10 +78,8 @@ while True:
         result = arg1 // arg2
 
     # Output data
-    if result:
+    if not result is None:
         print(f'Result: {arg1} {operator} {arg2} = {round(result, 2)}')
 
     # There was a bug which didn't give any output in case if Result was equal to '0' due to result = None construction.
     # This lines were intended to fix this but.
-    if result == 0:
-        print(f'Result: {arg1} {operator} {arg2} = {result}')
