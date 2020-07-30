@@ -10,41 +10,35 @@ the call make_operation(‘+’, 7, 7, 2) should return 16
 the call make_operation(‘-’, 5, 5, -10, -20) should return 30
 the call make_operation(‘*’, 7, 6) should return 42  '''
 
-
-
-# Я извиняюсь, не успел доработать код и он получился запутанным.
-# Я стремился сделать обработку неправильного ввода отдельной функцией, долго с этим провозился  и не успел
-# реализовать все, что задумал и поредактировать код, уже пора сдавать задание.
-
 list_of_args = []
 
-def input_inspector(input_to_check):
-    if type(input_to_check) == list:
-        for i in range(len(input_to_check)):
-            if '-' in str(input_to_check[i]) or '.' in str(input_to_check[i]) or str(input_to_check[i]).isdigit():
-                if str(input_to_check[i]).replace('-', '').isdigit() == False:
-                    print(f'Only numbers are valid input for an arithmetical operation. "{input_to_check[i]}" was not included.')
-                    continue
-                list_of_args.append(float(input_to_check[i]))
-    elif type(input_to_check) == int or type(input_to_check) == float:
-        return input_to_check
-
+# This  function takes operator and user input (if it may be required to pass into function)
 def take_input():
     operator_input = input('Please, enter a valid operator (+ - * / ):  ').replace(' ', '')
-    numbers_input = input('Please, enter arguments, separated by comma: ').replace(' ', '').split(',')
-    input_inspector(numbers_input)
-    first_number = list_of_args[0]
-    rest_of_numbers = list_of_args[1:]
-    return (operator_input, first_number, rest_of_numbers)
+    input_to_check = input('Please, enter arguments, separated by comma: ').replace(' ', '').split(',')
+    return (operator_input,  input_to_check)
+
+
+def input_inspector(input_to_check):
+    if type(input_to_check) == int or type(input_to_check) == float:
+        list_of_args.append(float(input_to_check))
+    elif type(input_to_check) == list or type(input_to_check) == tuple:
+        for i in range(len(input_to_check)):
+            if '-' in str(input_to_check[i]) or '.' in str(input_to_check[i]) or str(input_to_check[i]).isdecimal():
+                if str(input_to_check[i]).replace('-', '').isdecimal() == False:
+                    continue
+                list_of_args.append(float(input_to_check[i]))
 
 def make_operation(operator, arg1, *args):
-    result = 0
-    if input_inspector(arg1):
-        result += arg1
+    if len(list_of_args) > 0:
+        result = arg1
+        input_inspector(args)
     else:
-        print('You should enter number for the first argument.')
-        quit()
-    input_inspector(args)
+        input_inspector(arg1)
+        result = arg1
+        input_inspector(args)
+
+
 
     if operator == '+':
         for i in list_of_args[1:]:
@@ -57,7 +51,8 @@ def make_operation(operator, arg1, *args):
         print(result)
 
     if operator == '*':
-        for i in list_of_args[1:]:
+        result = 1
+        for i in list_of_args[:]:
             result *= i
         print(result)
 
@@ -70,7 +65,25 @@ def make_operation(operator, arg1, *args):
         print(round(result, 2),)
 
 
-operator, arg1, *args = take_input()
 
-make_operation(operator,arg1, *args)
+operator_input, input_to_check = take_input()
+input_inspector(input_to_check)
+arg1 = list_of_args[0]
+args = list_of_args[1:]
 
+make_operation(operator_input, arg1, args)
+
+list_of_args = []
+make_operation('+', 7, 7, 2)
+
+list_of_args = []
+make_operation('-', 5, 5, -10, -20)
+
+list_of_args = []
+make_operation('*', 6, 7)
+
+list_of_args = []
+make_operation('/', 100, 10, 3)
+
+list_of_args = []
+make_operation('/', 100, 10, 0)
