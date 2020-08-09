@@ -22,5 +22,5 @@ with open('../Archive/myfile.txt') as f:
 # 4) Again we use 'ls -la' to make sure that file was created in the folder. Yes it is!
 
 # 5) I can open this file even from my home directory. To go to home directory we use command 'cd', and there I use
-# command 'python3 Py/GitHub/Lesson_9/Lesson_9_Task_1.py' to open file at any directory, only need to specify
+# command 'python3 Py/GitHub/Lesson_09/Lesson_9_Task_1.py' to open file at any directory, only need to specify
 # correct full Path using '/' for directories.
