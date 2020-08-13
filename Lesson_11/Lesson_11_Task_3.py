@@ -84,7 +84,7 @@ TTL Cost:   ${item.price * item.qty}'''
             category = input('Enter category: ')
             type = input('Enter type: ')
             name = input('Enter name: ')
-            price = int(input('Enter price: ')) * ((100 - price_premium) / 100) # Discount from supplier applied.
+            price = float(input('Enter price: ')) * ((100 - price_premium) / 100) # Discount from supplier applied.
             quantity = int(input('Enter q-ty: '))
             new_product = Product(category, type, name, price) # Instance of new product created.
         elif not quantity:
