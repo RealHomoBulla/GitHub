@@ -23,6 +23,8 @@ def logger(func):
     '''wrapper docstring will not be shown'''
     result = func(*args, **kwargs)
     print(f'Function {func.__name__} was called with parameters {args}.')
+    return result
+  
   return wrapper
 
 
