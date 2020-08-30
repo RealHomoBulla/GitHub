@@ -1,0 +1,12 @@
+This is
+some random
+text
+to
+test
+my module
+with inner functions,
+which is called
+"mymod.py"
+
+
+Hello world!
