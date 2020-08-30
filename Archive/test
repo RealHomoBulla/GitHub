@@ -1,0 +1,21 @@
+def make_operation(operator='-', arg1=0, *args):
+    if operator == '+':
+        result = arg1
+        for i in args:
+            result += i
+    elif operator == '-':
+        result = arg1
+        for i in args:
+            result -= i
+    elif operator == '*':
+        result = arg1
+        for i in args:
+            result *= i
+    elif operator == '/':
+        result = arg1
+        for i in args:
+            if i == 0:
+                return ('На 0 делить нельзя')
+            result /= i
+    return result
+print(make_operation('-',5, 5, -10, -20))
