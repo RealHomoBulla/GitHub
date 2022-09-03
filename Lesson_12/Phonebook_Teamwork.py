@@ -77,35 +77,30 @@ class College(Human):
 
     # Создает словарь из объекта. Используется для записи в JSON и для поиска (поиск по items). Отличается наличием 'Work Phone'.
     def create_dict(self):
-        return {
-            'Name': self.name,
-            'Last Name': self.second_name,
-            'Phone': self.phone,
-            'Work Phone': self.work_phone,
-            'Is college': True
-        }
+        ret = super().create_dict()
+        ret.update({'Work Phone': self.work_phone,
+            'Is college': True})
+        return ret
 
     # Считывает словарь и обновляет аттрибуты класса. Отличается наличием 'Work Phone'.
     def fill_data(self, data):
-        self.name = data['Name']
-        self.second_name = data['Last Name']
-        self.phone = data['Phone']
+        super().fill_data(data)
         self.work_phone = data['Work phone']
 
 
 class PhoneBook:
 
     def __init__(self, name_file):
-        self.name_file = name_file
+        Имя файла в котором все хранится не должно по идее меняться в процессе работы тут логичнее __ использовать.
+        self.__name_file = name_file
         self.list_contacts_obj = []
         self.chosen_contact = 0
         # Вызывается метод для проверки наличия Базы Данных. Если не найдена, внутри него вызовется метод создания Демо-базы.
         self.open_db()
 
     def __len__(self):
-        length = len(self.list_contacts_obj)
-        print(f'\nВ контактной книге найдено: {length} контакта.')
-        return length
+#         Принт тут неожиданный. Лучше так не делать. Надо вернуть количество - возвращаем но не принтуем ничего тут же.
+        return len(self.list_contacts_obj)
 
     # Создает Демо-базу из 4х вымышленных контактов для демонстрации работы программы.
     def create_demo(self):
@@ -140,9 +135,11 @@ class PhoneBook:
         for i in demo_db:
             self.list_contacts_obj.append(i)
         # Записывает Список Контактов в JSON для последующей работы.
-        with open(self.name_file, 'w') as f_obj:
+        with open(self.__name_file, 'w') as f_obj:
             json.dump(self.list_contacts_obj, f_obj)
-
+#         И в итоге у нас лист словарей а не обьектов. Приплыли :)
+        
+        
     # При запуске программы проверяет наличие Базы Данных.
     def open_db(self):
         if not os.path.isfile(f'./{PHONE_BOOK_NAME}'):
@@ -150,7 +147,7 @@ class PhoneBook:
             # База данных не найдена, создается Демо
             self.create_demo()
         elif os.path.isfile(f'./{PHONE_BOOK_NAME}'):
-            with open(self.name_file, 'r') as f_obj:
+            with open(self.__name_file, 'r') as f_obj:
                 # Если найдена, считывает из файла и создает объекты контактов.
                 temp = json.load(f_obj)
                 try:
@@ -172,7 +169,7 @@ class PhoneBook:
     def save(self):
         list_to_write = [x.create_dict() for x in self.list_contacts_obj]
         try:
-            with open(self.name_file, 'w') as f_obj:
+            with open(self.__name_file, 'w') as f_obj:
                 json.dump(list_to_write, f_obj)
         except:
             print('Не получилось сохранить файл')
@@ -188,30 +185,36 @@ class PhoneBook:
             return College(name, second_name, phone, work_phone)
         else:
             return Human(name, second_name, phone)
-
+    
+    def fill_contact(self):
+        '''Вернет тапл name second_name is_college work_phone'''
+        user_choice = ''
+        print('\nYou are going to add a person.')
+        name = input('Name: ')
+        second_name = input('Second Name: ')
+        phone = input('Phone: ')
+        work_phone = ''
+        print('Is it your colleague?')
+        while user_choice.lower() != 'y' or user_choice.lower() != 'n':
+            user_choice = input('[Y/N]: ')
+            if user_choice.lower() == 'y':
+                is_college = True
+                work_phone = input('Work Phone: ')
+                break
+            elif user_choice.lower() == 'n':
+                is_college = False
+                break
+        return   name, second_name, is_college, work_phone
+    
     # Проверяет, существует ли добавляемый объект. Если не существует, успешно его добавляет.
     # Может вызываться из меню для добавления имени и данных вручную.
     def add_person(self, contact=None):
         if not contact:
-            user_choice = ''
-            print('\nYou are going to add a person.')
-            name = input('Name: ')
-            second_name = input('Second Name: ')
-            phone = input('Phone: ')
-            print('Is it your colleague?')
-            while user_choice.lower() != 'y' or user_choice.lower() != 'n':
-                user_choice = input('[Y/N]: ')
-                if user_choice.lower() == 'y':
-                    is_college = True
-                    work_phone = input('Work Phone: ')
-                    break
-                elif user_choice.lower() == 'n':
-                    is_college = False
-                    work_phone = ''
-                    break
+            name, second_name, is_college, work_phone = self.fill_contact()
             contact = self.return_person(name, second_name, phone, work_phone, is_college)
         if contact not in self.list_contacts_obj:
             self.list_contacts_obj.append(contact)
+#         после добавляения удаления и редактирования надо сохраняться на диск. Вдруг свет пропадет - а мы сохранились
 
     # Метод для редактиирования данных контакта.
     def edit_contact(self, contact=None):
@@ -219,7 +222,7 @@ class PhoneBook:
             print('\nOkay. You are going to edit some contact.')
             contact = self.search_choose_one_contact()
 
-        if contact in self.list_contacts_obj:
+        if contact and contact in self.list_contacts_obj: # контакт может быть ноне так что лучше проверить что нашли таки.
             info_to_edit = ''
             while not quit_or_menu(info_to_edit):
                 info_to_edit = input('\nWhat would you like to Edit? \n"1" for Name, \n"2" for Surname, \
@@ -252,14 +255,14 @@ class PhoneBook:
         if not contact:
             print('\nOkay. You are going to delete some contact.')
             contact = self.search_choose_one_contact()
-        if contact in self.list_contacts_obj:
+        if contact and contact in self.list_contacts_obj: # контакт может быть ноне так что лучше проверить что нашли таки.
             print(f'\nYour contact "{contact.name} {contact.second_name}" was successfully deleted. ')
             self.list_contacts_obj.remove(contact)
 
 
     # Печатает всю телефонную книгу + количество контактов в ней
     def print_phonebook(self):
-        len(phone_book_1)
+        len(phone_book_1)# вот тут на много органичнее принтовать сколько записей.
         for x in self.list_contacts_obj:
             print(x)
 
@@ -272,12 +275,7 @@ class PhoneBook:
             contact_dict = contact.create_dict()
             if search_line.lower() in str(contact_dict.items()).lower():
                 temp_list.append(contact)
-        if len(temp_list) >= 1:
-            print(f'\nHere is what was found on your search request: ')
-            for n in temp_list:
-                print(n)
-        else:
-            print('\nSeems like nothing was found, try again!')
+        # поиск только ищет. Тот кто заказывал поиск сам решит что принтовать и в каком виде. Урезаем функции до одного действия по возможности.
         return temp_list
 
     # Дает выбрать один конкретный контакт, но нужно написать имя и фамилию в точности
@@ -286,7 +284,7 @@ class PhoneBook:
         for contact in self.list_contacts_obj:
             if str(f'{contact.name} {contact.second_name}') == user_choice:
                 return contact
-            continue
+            # если бы ниже был еще какой то код который надо пропускать то да, а так оно лишнее было.
 
     # Показывает контакты в режиме листания, как на старом кнопочном телефоне.
     def showing_contact(self):
@@ -304,6 +302,7 @@ class PhoneBook:
         return self.list_contacts_obj[self.chosen_contact]
 
     def next_contact(self):
+#         опять с начала меняем потом проверяем. ну ок. ошибки нет. но логика немного не правильная. Представь что ты пришел на пляж и начал загорать а потом проверил что разделся.
         self.chosen_contact += 1
         if self.chosen_contact >= len(self.list_contacts_obj):
             self.chosen_contact = 0
@@ -315,64 +314,59 @@ class PhoneBook:
             self.chosen_contact = len(self.list_contacts_obj) - 1
         return self.list_contacts_obj[self.chosen_contact]
 
-if __name__ == '__main__':
 
-    # Initialize the phonebook (from file)
-    phone_book_1 = PhoneBook(PHONE_BOOK_NAME)
+def demonstration(phone_book_1):
+    # Print the Phonebook. Also, test inside the __len__ dunder method. Works fine
+    phone_book_1.print_phonebook()
 
-    def demonstration(phone_book_1):
+    # Adding the person works as well.
+    person_1 = phone_book_1.return_person(
+        'Ivan',
+        'Jefferson',
+        '0951234567',
+        is_college=False,
+        work_phone='789456')
+    phone_book_1.add_person(person_1)
+    # Also we can print separate person just fine.
+    print('\nNow separate contact will be printed!\n', person_1)
 
-        # Print the Phonebook. Also, test inside the __len__ dunder method. Works fine
-        phone_book_1.print_phonebook()
+    # Check if he added to phonebook and if __len__ changes:
+    phone_book_1.print_phonebook()
 
-        # Adding the person works as well.
-        person_1 = phone_book_1.return_person(
-            'Ivan',
-            'Jefferson',
-            '0951234567',
-            is_college=False,
-            work_phone='789456')
-        phone_book_1.add_person(person_1)
-        # Also we can print separate person just fine.
-        print('\nNow separate contact will be printed!\n', person_1)
+    # Delete this person:
+    phone_book_1.delete_contact(person_1)
+    # Also, delete works without argumant, searching for a contact.
+    phone_book_1.delete_contact()
 
-        # Check if he added to phonebook and if __len__ changes:
-        phone_book_1.print_phonebook()
+    # Check again if delete function works:
+    phone_book_1.print_phonebook()
 
-        # Delete this person:
-        phone_book_1.delete_contact(person_1)
-        # Also, delete works without argumant, searching for a contact.
-        phone_book_1.delete_contact()
+    phone_book_1.search_contact()
 
-        # Check again if delete function works:
-        phone_book_1.print_phonebook()
-
-        phone_book_1.search_contact()
-
-    # !!! YOU CAN  COMMENT OUT THIS LINE TO TEST HOW ITS USED WITHOUT MENU !!!
-    # demonstration(phone_book_1)
+# !!! YOU CAN  COMMENT OUT THIS LINE TO TEST HOW ITS USED WITHOUT MENU !!!
+# demonstration(phone_book_1)
 
 
-    # Функция для возврата в главное меню, для выхода с сохранением
-    def quit_or_menu(user_input):
-        if user_input.lower().replace(' ', '') == 'q':
-            print(f"\nAny changes will be saved to a file '{PHONE_BOOK_NAME}' for future use.")
-            print('Thank you for using our Contacts App!')
-            phone_book_1.save()
-            quit()
-        elif user_input.lower().replace(' ', '') == 'm':
-            print('\nOkay, going back to Main Menu.')
-            menu()
-        else:
-            return False
+# Функция для возврата в главное меню, для выхода с сохранением
+def quit_or_menu(user_input):
+    if user_input.lower().replace(' ', '') == 'q':
+        print(f"\nAny changes will be saved to a file '{PHONE_BOOK_NAME}' for future use.")
+        print('Thank you for using our Contacts App!')
+        phone_book_1.save()
+        quit()
+    elif user_input.lower().replace(' ', '') == 'm':
+        print('\nOkay, going back to Main Menu.')
+        menu()
+    else:
+        return False
 
-    # Тело главного меню, циклично работает, пока пользователь не решит выйти.
-    # Каждый цикл книга пересохраняется на всякий случай.
-    def menu():
-        menu_choice = ''
-        while not quit_or_menu(menu_choice):
-            phone_book_1.save()
-            menu_choice = input('''\n1. Show All Contacts
+# Тело главного меню, циклично работает, пока пользователь не решит выйти.
+# Каждый цикл книга пересохраняется на всякий случай.
+def menu(phone_book_1):
+    menu_choice = ''
+    while not quit_or_menu(menu_choice):
+        phone_book_1.save()
+        menu_choice = input('''\n1. Show All Contacts
 2. Single Contact View
 3. Add Contact
 4. Edit Contact
@@ -384,25 +378,30 @@ Also, anywhere in the Program you can use:
 [Q/q] - Quit
 
 Your action: ''')
-            if menu_choice == '1':
-                phone_book_1.print_phonebook()
-            elif menu_choice == '2':
-                phone_book_1.showing_contact()
-            elif menu_choice == '3':
-                phone_book_1.add_person()
-            elif menu_choice == '4':
-                try:
-                    phone_book_1.edit_contact()
-                except:
-                    print('\nSomething went wrong. You will continue from Main Menu.\nPlease be careful with input!')
-                    menu()
-            elif menu_choice == '5':
-                try:
-                    phone_book_1.delete_contact()
-                except:
-                    print('\nSomething went wrong. You will continue from Main Menu.\nPlease be careful with input!')
-                    menu()
-            elif menu_choice == '6':
-                phone_book_1.search_contact()
+        if menu_choice == '1':
+            phone_book_1.print_phonebook()
+        elif menu_choice == '2':
+            phone_book_1.showing_contact()
+        elif menu_choice == '3':
+            phone_book_1.add_person()
+        elif menu_choice == '4':
+            try:
+                phone_book_1.edit_contact()
+            except:
+                print('\nSomething went wrong. You will continue from Main Menu.\nPlease be careful with input!')
+                menu()
+        elif menu_choice == '5':
+            try:
+                phone_book_1.delete_contact()
+            except:
+                print('\nSomething went wrong. You will continue from Main Menu.\nPlease be careful with input!')
+                menu()
+        elif menu_choice == '6':
+            phone_book_1.search_contact()
+                
+if __name__ == '__main__':
 
-    menu()
+    # Initialize the phonebook (from file)
+    phone_book_1 = PhoneBook(PHONE_BOOK_NAME)
+#     передаем параметром чтоб функция работала с тем что примет а не с глобальной переменной
+    menu(phone_book_1)
