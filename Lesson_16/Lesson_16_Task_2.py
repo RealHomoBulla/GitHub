@@ -2,37 +2,11 @@
 Create your own implementation of a built-in function range, named in_range(), which takes three parameters:
 `start`, `end`, and optional step. Tips: See the documentation for `range` function'''
 
-def in_range(*args):
-    lst = []
-    # If there is only one argument, it means it must be "stop" argument, starting from 0 and step is 1.
-    if len(args) == 1:
-        # Start from 0:
-        number = 0
-        # Incrementing the number while "stop" value is reached.
-        while number < args[0]:
-            # Filling the list one by one until condition is met.
-            lst.append(number)
-            number += 1
-    elif len(args) == 2:
-        number = args[0]
-        while number < args[1]:
-            lst.append(number)
-            number += 1
-    elif len(args) == 3:
-        number = args[0]
-        # For a normal positive step:
-        if args[0] < args[1]:
-            while number < args[1]:
-                lst.append(number)
-                number += args[2]
-        # For a negative step:
-        elif args[0] > args[1]:
-            while number > args[1]:
-                lst.append(number)
-                number += args[2]
-    else:
-        raise TypeError(f'range expected at most 3 arguments, got {len(args)}')
-    return lst
+def in_range(start=0, stop=0, step=1): # я переписал как у тебя все три опциональные но по ТЗ только шаг опционален. То есть старт и енд всегда должны быть
+    start, stop = (min(start, stop), max(start, stop)) if step>0 else (max(start, stop), min(start, stop))
+    while ((start < stop) if step>0  else ( start > stop)):
+        yield start
+        start += step
 
 # Works with only one argument.
 for i in in_range(10):
